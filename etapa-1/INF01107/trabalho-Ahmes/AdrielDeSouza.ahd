@@ -1,0 +1,186 @@
+; Adriel de Souza
+; Trabalho Ahmes
+
+;======================
+; DEFINICAO DE MEMORIA
+;======================
+
+ORG 128
+x1: 	db
+x2: 	db
+w1: 	db
+w2: 	db
+biasA:	db
+biasB:	db
+saidaA: db
+saidaB: db
+m1A: db
+m1B: db
+m2A: db
+m2B: db
+CTE1:	db 1
+CTE0:	db 0
+CTE8: 	db 8
+auxM:	db
+K: 		db
+
+
+;======================
+;  INICIO DO PROGRAMA
+;======================
+ORG 0
+
+LDA CTE0
+STA saidaA 		; saida <- 0
+STA saidaB
+STA m1A
+STA m1B			; m1 <- 0
+STA m2A
+STA m2B			; m2 <- 0
+
+; =====================================	
+; saida <- x1 * |w1| (2 bytes)
+; =====================================	
+
+			LDA w1
+			JP salvaw1				; Se for positivo salva o w2 como auxM
+			NOT						; caso contrário salva o complemento
+			ADD CTE1
+salvaw1:	STA auxM
+			LDA CTE8
+			STA K
+
+contM1:		LDA K
+			JZ verifNeg1 			; Se K for zero, termina multiplicação
+			SUB CTE1
+			STA K					; K <- K - 1
+			
+			LDA auxM
+			SHR
+			STA auxM
+			LDA m1A
+			JNC	NCM1				; Se não tiver carry, somente faz o shift
+			ADD x1
+NCM1:		SHR
+			STA m1A
+			LDA m1B
+			ROR 
+			STA m1B
+			JMP contM1
+
+verifNeg1:	LDA w1					
+			JP somaPM1				; Se w1 for negativo, inverte o sinal de resultado da multiplicação
+			LDA m1A
+			NOT 
+			STA m1A
+			LDA m1B
+			NOT
+			ADD CTE1
+			STA m1B
+			JNC somaPM1
+			LDA m1A
+			ADD CTE1
+			STA m1B
+			
+somaPM1:	LDA m1A					; Copia o resultado da multiplicação para a  saida
+			STA saidaA
+			LDA m1B
+			STA saidaB
+			JNC fimM1
+			LDA saidaA
+			ADD CTE1
+			STA saidaA
+fimM1: 		NOP
+
+; =====================================	
+; saida <- saida + x2 * |w2| (2 bytes)
+; =====================================
+
+			LDA w2
+			JP salvaw2				; Se for positivo salvo o w2 como auxM
+			NOT						; caso contrário salva o complemento
+			ADD CTE1
+salvaw2:	STA auxM
+			LDA CTE8		
+			STA K					; K <- 8
+
+
+contM2:		LDA K
+			JZ verifNeg2 			;Se K for zero, termina a multiplicação
+			SUB CTE1
+			STA K					; K <- K - 1
+
+
+JMP 145	; Pula para o endereço 145 para continuar a execução
+ORG 145
+
+
+			LDA auxM
+			SHR
+			STA auxM
+			LDA m2A
+			JNC	NCM2				; Se não tiver carry, somente faz o SHR
+			ADD x2					
+NCM2:		SHR
+			STA m2A
+			LDA m2B
+			ROR 
+			STA m2B
+			JMP contM2
+
+verifNeg2:	LDA w2					
+			JP somaPM2				; Se w2 for negativo, inverte o sinal de resultado da multiplicação
+			LDA m2A
+			NOT 
+			STA m2A
+			LDA m2B
+			NOT
+			ADD CTE1
+			STA m2B
+			JNC somaPM2
+			LDA m2A
+			ADD CTE1
+			STA m2B
+			
+somaPM2:	LDA saidaA				; Soma o resultado da multiplicação na saida
+			ADD	m2A
+			STA saidaA
+			LDA saidaB
+			ADD m2B
+			STA saidaB
+			JNC fimM2
+			LDA saidaA
+			ADD CTE1
+			STA saidaA
+fimM2: 		NOP
+
+
+; =====================================	
+; saida <- saida + bias
+; =====================================	
+
+			LDA saidaA		; Soma a parte mais significativa
+			ADD biasA
+			STA saidaA
+	
+			LDA saidaB		; Soma a parte menos significativa
+			ADD biasB
+			STA saidaB
+
+			JNC fimAddBias	; Se não tiver carry, termina parte		
+			LDA saidaA
+			ADD CTE1
+			STA saidaA
+fimAddBias:	NOP
+
+; =====================================	
+; Se saida < 0, saida <- 0
+; =====================================	
+
+			LDA saidaA		
+			JP fimProgram  ; Se a parte mais significativa for positiva, termina programa
+			LDA CTE0		; Caso contário, zera a saida
+			STA saidaA
+			STA saidaB
+
+fimProgram: HLT
