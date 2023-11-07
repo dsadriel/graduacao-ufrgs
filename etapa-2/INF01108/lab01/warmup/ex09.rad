@@ -1,0 +1,23 @@
+; LAB 01
+; Exercicio 7
+
+ORG h80
+	x_: db
+	xh: db
+	hl: db
+
+ORG 0
+	; Obtem a parte menos sig com mascára
+	LDR A, x_
+	AND A, #h0F
+	STR A, xl
+	
+	; Obtem a parte mais sig com shift rigth
+	LDR B, x_
+	SHR B
+	SHR B
+	SHR B
+	SHR B
+	STR B, xh
+
+HLT

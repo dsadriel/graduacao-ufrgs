@@ -1,0 +1,41 @@
+; LAB 01
+; Exercicio 3
+
+; Implemente um programa que compara se duas strings são iguais. Considere
+; que a primeira string está definida a partir da posição H81 e que a segunda 
+; está definida a partir da posição HC0.
+
+
+ORG h80
+	RES: db
+	SRC: dab 'hello world', 0
+ORG hC0
+	DST: dab 'hello world', 0
+
+ORG 0
+		; Define-se incialmente que a string são iguais
+		LDR A, #1
+		STR A, RES
+		
+		LDR X, #255
+
+laco:	; Laço de verificação
+		ADD X, #1
+		LDR A, SRC, X
+		JZ fimSRC ; Se a string SRC tiver terminado
+		SUB A, DST, X
+		JZ laco  ; Se os caracarteres forem diferentes
+		JMP diferentes
+
+fimSRC: ; Verifica se a string DST terminou também
+		LDR A, DST, X
+		JZ fim
+		JMP diferentes
+
+diferentes: ; Atualiza o resultado
+		LDR A, #0
+		STR A, res
+
+fim:
+		HLT
+		

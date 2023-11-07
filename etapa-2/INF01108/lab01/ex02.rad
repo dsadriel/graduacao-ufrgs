@@ -1,0 +1,41 @@
+; LAB 01
+; Exercicio 2
+
+; Quando transferimos arquivos, é comum que partes destes arquivos acabem
+; sendo perdidas na transmissão ou devido a uma unidade de armazenamento
+; defeituosa. O checksum é um valor utilizado para detectar erros em arquivos, e
+; consiste em gerar um valor de verificação calculado a partir dos caracteres da
+; string. Implemente um algoritmo para calcular o checksum a partir da soma dos
+; bytes de uma dada string cujo endereço está na posição H81 de memória
+
+
+ORG h80
+	res: db
+	endString: db h85
+	ptrString: db
+
+ORG h85
+	dab 'hello world', 0
+
+ORG 0
+		LDR B, #0
+		STR B, res
+		LDR A, endString
+		STR A, ptrString
+		
+laco:
+		LDR B, ptrString, I
+		JZ fim
+		ADD B, res
+		STR B, res
+		
+		; Incrementa o ponteiro
+		LDR A, ptrString
+		ADD A, #1
+		STR A, ptrString
+		
+		JMP laco
+
+fim:
+		HLT
+		

@@ -1,0 +1,24 @@
+; LAB 01
+; Exercicio 1
+
+; Implemente um programa que calcula o número de caracteres de uma string do
+; C. O endereço da string está indicado na posição H81 da memória. O final da
+; string é indicado pelo caracter de terminação ‘\0’.
+
+
+ORG h80
+res: db
+string: dab 'hello world', 0
+
+ORG 0
+	LDR X, #0
+laco:
+	LDR A, string, X
+	JZ fim
+	ADD X, #1
+	JMP laco
+
+fim:
+	STR X, res
+	HLT
+	

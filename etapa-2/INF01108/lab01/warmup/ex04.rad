@@ -1,0 +1,17 @@
+; LAB 01
+; Exercicio 4
+
+ORG h80
+j: db 0
+k: db 0
+mask: db h10
+
+ORG 0	
+	LDR A, k
+	AND A, mask
+	JZ fim
+	LDR A, k
+	STR A, j
+	JMP fim
+fim:
+	HLT

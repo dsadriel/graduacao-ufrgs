@@ -1,0 +1,15 @@
+; LAB 01
+; Exercicio 6
+
+ORG h80
+result: db 0
+x: db 0
+y: db 0
+
+ORG 0	
+	LDR A, x
+	SUB A, y
+	JN fim
+	STA A, x
+fim:
+	HTL

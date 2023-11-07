@@ -1,0 +1,64 @@
+; LAB 01
+; Exercicio 3
+
+; Implemente um programa que percorre uma string e indica se ela é um
+; palíndromo, isto é, se a string na ordem natural é equivalente à sua versão na
+; ordem inversa. Exemplos: ovo, reviver, arara. Caso positivo, escreva 1 na posição
+; H80, caso contrário, 0. Considere que a posição H81 guarda o endereço da string
+; e que ela sempre estará após a posição H8A, ou seja, você pode utilizar as
+; posições H82-89 para variáveis locais do seu programa.
+
+ORG h80
+	RES: db 0
+	ENDstr: db h8A
+	PTRstart: db
+	PTRend: db
+	LEN: db 0
+	IND: db 0
+ORG h8A
+	dab 'hello world', 0
+
+ORG 0
+		LDR A, ENDstr
+		STR A, PTRstart
+		; Obtem-se o tamanho da string
+		JSR strLen
+		
+		; Atualiza-se o ponteiro do fim da string
+		LDR A, ENDstr
+		ADD A, LEN
+		STR A, PTRend
+		
+laco: 	
+		LDR A, PTRstart, I
+		SUB A, PTRend, I
+		JZ passo2
+		JMP naoSaoPali
+
+passo2:		
+		; Atualiza os ponteiros
+		LDR B, PTRstart
+		ADD B, #1
+		STR B, PTRstart
+		LDR B, PTRend
+		SUB B, #1
+		STR B, PTRend
+		
+		; Se PTRend < PTRstart, termina o programa
+		LDR B, PTRend
+		SUB B, PTRstart
+		JZ fim
+		JMP laco
+
+naoSaoPali:
+		LDR A, #0
+		STR A, RES
+		
+fim:
+		HLT
+
+strLen:
+	NOP
+	; Assume-se que foi desevolvida uma rotina para calcular o tamanho da string
+	
+	JMP strLen, I

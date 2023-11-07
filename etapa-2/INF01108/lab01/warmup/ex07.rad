@@ -1,0 +1,31 @@
+; LAB 01
+; Exercicio 7
+
+ORG h80
+z: dab [2]
+x_: dab [2]
+y: dab [2]
+
+ORG 0
+	
+	; Soma a parte mais sig
+	LDR A, x_
+	ADD A, y
+	
+	; Soma a parte menos sig
+	LDR X, #1
+	LDR B, x_, X
+	ADD B, y, X
+	; Se tiver carry, incrementa o regA
+	JC incrementa_regA
+	JMP salva
+
+incrementa_regA:
+	ADD A, #1
+
+; Salva ambos registradores e termiana o programa
+salva:
+	STR A, z
+	STR B, z, X
+	
+	HLT
