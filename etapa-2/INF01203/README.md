@@ -1,2 +1,2 @@
 # Disciplina: INF01203: Estruturas de Dados
-## Professores: Renata De Matos Galante
+## Professor: Renata De Matos Galante
