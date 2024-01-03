@@ -1,0 +1,118 @@
+;     Adriel de Souza     |        00******
+;         Turma B         | Prof. Mateus Grellert 
+;           UFRGS         |        2023/2
+; Trabalho de Programação |   Processador RAMSES
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;     DEFINIÇÃO DE VARIAVEIS     ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+ORG 189    
+    AUX: db   ;; Endereço auxiliar
+    SRC_PTR: db  ;; Ponteiro relativo para a string de origem
+    DST_PTR: db ;; Ponteiro relativo para a string destino
+
+    SRC: db ;; End. 192: contém o endereço de início do string a ser processado pelo seu programa (SRC);
+    DST: db ;; End. 193: contém o endereço de início do string onde colocar o resultado do seu programa (DST);
+    PASSO: db ;; End. 194: passo de deslocamento para o processamento da mensagem oral (PASSO). Valor entre 1 e 25 
+    OPERACAO: db ;; End. 195: processamento a ser realizado (OPERACAO): Valor zero, se for cifragem, ou um valor diferente de zero, se for decifragem.
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;       INICIO DO PROGRAMA       ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ORG 0 
+; Copia os endereços para os ponteiros relativos
+    LDR A, SRC
+    STR A, SRC_PTR
+    LDR A, DST
+    STR A, DST_PTR
+
+; Verifica qual operação e direciona para o loop
+    LDR A, OPERACAO
+    JZ cifragem_loop
+    JMP decifragem_loop
+
+; Loop da cifragem
+cifragem_loop:
+    LDR A, SRC_PTR, I
+    JZ fim
+    JSR cifrar_regA
+    STR A, DST_PTR, I
+    JSR incrementar_ponteiros
+    JMP cifragem_loop
+
+; Loop da decifragem
+decifragem_loop:
+    LDR A, SRC_PTR, I
+    JZ fim
+    JSR decifrar_regA
+    STR A, DST_PTR, I
+    JSR incrementar_ponteiros
+    JMP decifragem_loop
+
+; Fim do programa
+fim:
+    LDR A, #0       
+    STR A, DST_PTR, I  ;; Insere o terminador de string no final da string destino
+    HLT     ;; Termina a execução do programa
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;          SUB-ROTINAS           ;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Incrementa os ponteiros relativos
+incrementar_ponteiros:
+    NOP
+    LDR A, SRC_PTR
+    ADD A, #1
+    STR A, SRC_PTR
+
+    LDR A, DST_PTR
+    ADD A, #1
+    STR A, DST_PTR
+    JMP incrementar_ponteiros, I    ;; Retorno da rotina
+
+; Realiza a cifra no registrador A
+cifrar_regA:
+    NOP
+    ADD A, PASSO ;; Soma o PASSO a letra
+    STR A, AUX 
+    
+    JSR corrigir_cifra_regA_AUX
+    JMP cifrar_regA, I ;; Retorno da rotina
+
+
+; Realiza a decifra no registrador A
+decifrar_regA:
+    NOP
+    SUB A, PASSO
+    STR A, AUX
+
+    JSR corrigir_cifra_regA_AUX
+    JMP decifrar_regA, I ;; Retorno da rotina
+   
+; Corrige a cifra
+corrigir_cifra_regA_AUX:
+    NOP
+    LDR B, #90 
+    SUB B, AUX 
+    JN maior_q_90
+ 
+    LDR B, AUX
+    SUB B, #65
+    JN menor_q_65
+
+    JMP corrigir_cifra_regA_AUX, I  ;; Retorno da rotina
+
+    maior_q_90:
+        SUB A, #26
+        JMP corrigir_cifra_regA_AUX, I  ;; Retorno da rotina
+
+    menor_q_65:
+        ADD A, #26
+        JMP corrigir_cifra_regA_AUX, I  ;; Retorno da rotina
+
+
+    
